@@ -1,0 +1,1 @@
+cmake -D BUILD_MPI=yes -D PKG_MANYBODY=yes ../cmake
