@@ -423,7 +423,7 @@ For each deposition event, an insertion position is selected in the source regio
 
 The particle velocity is then directed from the insertion position toward that target point while retaining the magnitude of the initially generated velocity.
 
-See [`INSTALL.md`](INSTALL.md) for instructions on compiling LAMMPS with the modified source files.
+See [`INSTALLATION.md`](INSTALLATION.md) for instructions on compiling LAMMPS with the modified source files.
 
 ---
 
