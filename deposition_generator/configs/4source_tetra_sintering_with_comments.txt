@@ -1,0 +1,23 @@
+{
+  "n_source_regions": 4,   #corresponding to the number of seeds
+  "geometry": {
+    "element": "Cu",
+    "seeds": [             #seeds to be placed in the simulation box
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz"
+    ],
+    "geometry": "tetra",   #tetra/line/square. user-defined geometries are also possible via definition of displacing vectors.
+    "displacement": 15.0,  #how much to displace seeds
+    "max_tries": 50000,    #how many times should you try to randomly orient clusters and check if overlapping.
+    "type": "Cu",
+    "velocity_range": [0.0, 0.0],  #initial velocity of the clusters
+    "delta": 0.01,                 #size of the sources region. Keep it small to have good control over where clusters are placed
+    "target_size": [0.1, 0.1, 0.1], 
+    "n_depo": 1, #use these two like this to 
+    "every": 1,  #model sintering: only one cluster inserted at the first step per source
+    "random_seed": 42,
+    "temperature": 300.0
+  }
+}

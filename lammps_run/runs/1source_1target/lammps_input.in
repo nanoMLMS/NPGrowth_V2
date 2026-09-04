@@ -20,7 +20,7 @@ create_box 1 simulation_box             # Create a simulation box containing 1 a
 
 labelmap atom 1 Cu                      # Assign the chemical label "Cu" to atom type 1
 
-read_dump /Users/sofiazinzani/Documents/Dottorato/Unimi/Codici/NPGrowth_V2/lammps_run/seeds/Cu1688_Cube_com.xyz 0 x y z box no add yes format xyz
+read_dump /Users/gilberto/Desktop/scienza/code/NPGrowth_V2/lammps_run/seeds/Cu1688_Cube_com.xyz 0 x y z box no add yes format xyz
                                         # Read atomic coordinates from an XYZ file:
                                         # timestep = 0, columns = x y z,
                                         # do not overwrite the simulation box,
@@ -50,7 +50,7 @@ group attached dynamic added var attached every 2
 
 pair_style eam                          # Use the Embedded Atom Method (EAM) potential for atomic interactions
 
-pair_coeff * * /Users/sofiazinzani/Documents/Dottorato/Unimi/Codici/NPGrowth_V2/lammps_run/potentials/Cu_u3.eam
+pair_coeff * * /Users/gilberto/Desktop/scienza/code/NPGrowth_V2/lammps_run/potentials/Cu_u3.eam
                                         # Apply the Cu EAM potential file to all atom types
 
 fix momentum_fix initial momentum 1 linear 1 1 1 angular rescale
@@ -86,7 +86,7 @@ fix lgv_initial initial langevin 100.0 100.0 0.1 42
                                         # damping parameter = 0.1 ps,
                                         # random number seed = 42
 
-include /Users/sofiazinzani/Documents/Dottorato/Unimi/Codici/NPGrowth_V2/deposition_generator/generated_inputs/1source_1targets.in
+include /Users/gilberto/Desktop/scienza/code/NPGrowth_V2/deposition_generator/generated_inputs/1source_1targets.in
                                         # Include an external LAMMPS input file containing deposition instructions
 
 run 13000000 every 50 "group attached static" "group initial union attached initial" "group added subtract added attached" "group attached dynamic added var attached every 2"

@@ -1,0 +1,23 @@
+{
+  "n_source_regions": 4,   
+  "geometry": {
+    "element": "Cu",
+    "seeds": [             
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz"
+    ],
+    "geometry": "tetra",   
+    "displacement": 6.0,  
+    "max_tries": 50000,    
+    "type": "Cu",
+    "velocity_range": [0.0, 0.0],  
+    "delta": 0.01,                 
+    "target_size": [0.1, 0.1, 0.1], 
+    "n_depo": 1,  
+    "every": 1,  
+    "random_seed": 42,
+    "temperature": 300.0
+  }
+}

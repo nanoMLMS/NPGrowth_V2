@@ -1,0 +1,21 @@
+molecule molecule_0 /var/folders/rn/d8rdqv991jv59x3n1xfww9dc0000gn/T/tmpp8kwnsey
+molecule molecule_1 /var/folders/rn/d8rdqv991jv59x3n1xfww9dc0000gn/T/tmpr3cgpary
+molecule molecule_2 /var/folders/rn/d8rdqv991jv59x3n1xfww9dc0000gn/T/tmpso7zov8r
+molecule molecule_3 /var/folders/rn/d8rdqv991jv59x3n1xfww9dc0000gn/T/tmpkvl9z1y8
+
+region source_box_0 block 30.990000 31.010000 30.990000 31.010000 30.990000 31.010000
+region target_0_0 block 24.950000 25.050000 24.950000 25.050000 24.950000 25.050000
+fix deposit_0 added deposit 1 Cu 1 42 region source_box_0 near 2.56 vx 0.0 0.0 target target_0_0 mol molecule_0
+
+region source_box_1 block 30.990000 31.010000 18.990000 19.010000 18.990000 19.010000
+region target_1_0 block 24.950000 25.050000 24.950000 25.050000 24.950000 25.050000
+fix deposit_1 added deposit 1 Cu 1 43 region source_box_1 near 2.56 vx 0.0 0.0 target target_1_0 mol molecule_1
+
+region source_box_2 block 18.990000 19.010000 30.990000 31.010000 18.990000 19.010000
+region target_2_0 block 24.950000 25.050000 24.950000 25.050000 24.950000 25.050000
+fix deposit_2 added deposit 1 Cu 1 44 region source_box_2 near 2.56 vx 0.0 0.0 target target_2_0 mol molecule_2
+
+region source_box_3 block 18.990000 19.010000 18.990000 19.010000 30.990000 31.010000
+region target_3_0 block 24.950000 25.050000 24.950000 25.050000 24.950000 25.050000
+fix deposit_3 added deposit 1 Cu 1 45 region source_box_3 near 2.56 vx 0.0 0.0 target target_3_0 mol molecule_3
+

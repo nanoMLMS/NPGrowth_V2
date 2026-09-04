@@ -17,3 +17,5 @@ log.lammps
 
 # Ignore the full local LAMMPS source tree
 lammps_source_modified/lammps/
+
+lammps/
