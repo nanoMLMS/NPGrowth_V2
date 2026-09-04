@@ -1,0 +1,32 @@
+{
+  "n_source_regions": 1,
+
+  "sources": [
+    {
+      "source_region": [
+        30.659863,
+        34.659863,
+        -2.0,
+        2.0,
+        21.094011,
+        25.094011
+      ],
+
+      "n_target_regions": 1,
+
+      "targets": [
+        {
+          "size": [4, 4, 4],
+          "position": [0, -11.04, 12.88]
+        }
+      ],
+
+      "type": "Cu",
+      "velocity_range": [5.0, 8.0],
+      "near": 4.0,
+      "n_depo": 100,
+      "every": 5000,
+      "random_seed_LAMMPS": 42
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# LAMMPS outputs
+log.lammps
+*.dump
+*.restart
+*.traj
+
+# Temporary files
+*.tmp
+*~
+
+# Ignore the full local LAMMPS source tree
+lammps_source_modified/lammps/

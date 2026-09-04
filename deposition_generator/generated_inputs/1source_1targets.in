@@ -1,0 +1,4 @@
+region source_box_0 block 30.659863 34.659863 -2.000000 2.000000 21.094011 25.094011
+region target_0_0 block -2.000000 2.000000 -13.040000 -9.040000 10.880000 14.880000
+fix deposit_0 added deposit 100 Cu 5000 42 region source_box_0 near 4.0 vx 5.0 8.0 target target_0_0
+
