@@ -23,13 +23,18 @@ NPGrowth_V2/
 ├── deposition_generator/
 │   ├── generate_depo_input.py
 │   ├── configs/
-│   │   └── 1source_1targets.json
+│   │   ├── 1source_1targets.json
+│   │   └── 4source_tetra_sintering.json
 │   └── generated_inputs/
-│       └── 1source_1targets.in
+│       ├── 1source_1targets.in
+│       └── 4source_tetra_zerovel.in
 │
 ├── lammps_run/
 │   ├── runs/
-│   │   └── 1source_1target/
+│   │   ├── 1source_1target/
+│   │   │   ├── lammps_input.in
+│   │   │   └── run.sh
+│   │   └── sintering_tetra/
 │   │       ├── lammps_input.in
 │   │       └── run.sh
 │   ├── seeds/
@@ -70,6 +75,13 @@ simulation
 ```
 
 The deposition geometry is therefore kept separate from the rest of the LAMMPS simulation setup.
+
+Two configuration modes are supported by the same generator:
+
+* the standard **source/target mode** (sections 1-3), where you hand-specify the source and target regions and the deposition proceeds incrementally (nanoparticle growth);
+* the **geometry/sintering mode** (section 4), where you give a set of equilibrated seed clusters and a geometry, and the generator derives the source placements automatically so the clusters are inserted at rest as a sintering-start configuration.
+
+The two modes can be mixed freely: they are only two alternative input schemas for `generate_depo_input.py`.
 
 ---
 
@@ -253,6 +265,94 @@ Different independent sources should normally use different seeds.
 
 ---
 
+# Alternative usage: initial configurations for sintering experiments
+
+Instead of hand-specifying each source region, you can let the generator place a set of **equilibrated seed clusters** at a chosen geometry and separation. This is a convenient way to build the initial configuration for soft-landing sintering simulations: N identical (or distinct) clusters are inserted simultaneously **at rest** (zero velocity), with no substrate, and left to evolve.
+
+The generator synthesizes one source per cluster: a tiny `source_region` at the cluster's center of mass, the cluster as a molecule template, a single target at the central position, and a `fix deposit` with `n_depo 1`, `every 1` and `vx 0.0 0.0`. Because the velocity is zero, each cluster is placed at rest.
+
+## Configuration
+
+A sintering configuration uses a `geometry` block at the top level (instead of a `sources` list). The example below is `configs/4source_tetra_sintering.json`:
+
+```json
+{
+  "n_source_regions": 4,
+  "geometry": {
+    "element": "Cu",
+    "seeds": [
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz",
+      "../../lammps_run/seeds/Cu147_Ih.xyz"
+    ],
+    "geometry": "tetra",
+    "displacement": 15.0,
+    "max_tries": 50000,
+    "type": "Cu",
+    "velocity_range": [0.0, 0.0],
+    "delta": 0.01,
+    "target_size": [0.1, 0.1, 0.1],
+    "n_depo": 1,
+    "every": 1,
+    "random_seed": 42,
+    "temperature": 300.0
+  }
+}
+```
+
+`n_source_regions` must equal the number of `seeds`.
+
+### Fields
+
+* `element` / `type` — atomic element label passed to the deposition fixes.
+* `seeds` — one XYZ cluster file per source (length must equal `n_source_regions`). Relative paths are resolved against the config file's directory.
+* `geometry` — one of the named geometries `line`, `tri`, `square`, `tetra`, `y`, or a user-provided list of displacement directions (see below).
+* `displacement` — the inter-cluster separation. The geometry vectors are **not normalized**: for `line`, consecutive clusters are spaced by exactly `displacement`; for `tri`/`square`/`tetra`, `displacement` is the radial scale from the common center.
+* `max_tries` — number of random orientations/placements attempted by the overlap fit (default 50000).
+* `overlap_radius` — optional; half the minimum inter-atomic distance used by the overlap check. If omitted, it is derived automatically from the seed's smallest internal pair distance / 2.
+* `delta` — source-region half-width (placement precision), default `0.01`.
+* `near` — LAMMPS runtime minimum-distance check (`near 0` disables it). Default `2.56`.
+* `target_size`, `target_position` — size and center of the (single) target region per source.
+* `velocity_range` — deposition velocity range; use `[0.0, 0.0]` to place clusters at rest.
+* `n_depo`, `every` — use `1` and `1` so each cluster is inserted once at the first timestep.
+* `random_seed`, `temperature` — LAMMPS seed and thermostat target temperature.
+
+### Custom directions
+
+Instead of the named `geometry` value you may provide an explicit list of displacement vectors, one per seed:
+
+```json
+"geometry": {
+  "directions": [
+    [10.0, 0.0, 0.0],
+    [-10.0, 0.0, 0.0]
+  ]
+}
+```
+
+Each cluster's center of mass is placed at `offset + directions[i]`.
+
+## Overlap fit
+
+The generator places each cluster at the derived center of mass and performs a random rotation about its centroid, then checks the minimum inter-cluster distance against `2 * overlap_radius`. It counts how many of the `max_tries` arrangements are fully non-overlapping.
+
+If a fully non-overlapping arrangement is found the fit stops immediately. Otherwise, after `max_tries` attempts it keeps the best arrangement found and prints a warning. Note that a physically impossible or too-compact geometry will spend the full `max_tries` loop, so for such cases lower `max_tries` or increase `displacement`.
+
+## What the generator prints
+
+For a sintering configuration the generator prints the derived center-of-mass positions, the overlap radius, `delta`, `near`, and a semi-automatic type-setup reminder (see section on preparing a run):
+
+```text
+Configuration OK: geometry mode with 4 source regions.
+OK: found a non-overlapping arrangement after 1 tries (0 overlapping, 1 non-overlapping).
+COM positions (box coords):
+  cluster 0: (49.000, 49.000, 49.000)
+  ...
+```
+
+---
+
 # 4. Generate the LAMMPS deposition input
 
 From the repository root, run:
@@ -286,6 +386,36 @@ For multiple targets, an additional union is generated:
 ```text
 region target_box_0 union N target_0_0 target_0_1 ...
 ```
+
+## Generating a sintering configuration
+
+A geometry/sintering configuration is generated exactly the same way, by pointing the generator at the sintering config:
+
+```bash
+python deposition_generator/generate_depo_input.py \
+    --config deposition_generator/configs/4source_tetra_sintering.json \
+    --output deposition_generator/generated_inputs/4source_tetra_zerovel.in
+```
+
+The generated deposition file has the general form (note that all `molecule` templates are grouped at the top):
+
+```text
+molecule molecule_0 <tmpfile>
+molecule molecule_1 <tmpfile>
+...
+
+region source_box_0 block ...
+region target_0_0 block ...
+fix deposit_0 added deposit ... region source_box_0 ... target target_0_0 mol molecule_0
+
+...
+```
+
+### Ordering of the `molecule` commands
+
+The generator deliberately writes **all** `molecule` commands together at the top of the file, before any region or `fix deposit`. This is required for correctness: `fix deposit ... mol` resolves its molecule template to a pointer inside the LAMMPS `atom->molecules[]` array when the fix is constructed. If additional `molecule` commands are parsed afterwards, that array can grow (realloc), leaving the earlier fixes holding a dangling pointer, which segfaults at the first insertion. Grouping the molecules up front avoids that reallocation.
+
+As a consequence, the generated sintering file references temporary molecule files created during generation. Keep the same `.in` and its companion temp files around (i.e. re-run the generator before launching LAMMPS), and reference the `.in` via `include` in the main input.
 
 ---
 
@@ -331,6 +461,27 @@ read_dump
 pair_coeff
 include
 ```
+
+## Preparing a sintering run
+
+A sintering case (no substrate) is stored, for example, in:
+
+```text
+lammps_run/runs/sintering_tetra/
+├── lammps_input.in
+└── run.sh
+```
+
+The main input differs from the growth workflow in a few important ways:
+
+* **No substrate** — there is no `read_dump` of a substrate, and no `coordination` / `attached` group logic. All atoms are the placed clusters.
+* **`group added empty`** — the deposit fixes insert into the group `added`, so it must exist (it is created empty).
+* **Two atom types** — each deposited molecule atom gets type `base + internal_type`, so with a monoatomic Cu cluster you need `create_box 2`, `mass 1 63.546` and `mass 2 63.546`. Only type 1 is given a `labelmap atom 1 Cu`; **do not** add `labelmap atom 2 Cu` (LAMMPS rejects a duplicate element label). To show both types as Cu in the trajectory use `dump_modify dump1 element Cu Cu`.
+* **Thermostat on `all`** — the standard input thermostats the `initial` (substrate) group. Since there is no substrate, use `fix lgv_initial all langevin <T> <T> 0.1 <seed>` so the placed clusters are thermostatted.
+* **Tight simulation box** — the box only needs to contain the generated source/target regions plus the cluster radius.
+* **Include** — `include` the sintering-generated file (e.g. `4source_tetra_zerovel.in`).
+
+The generator prints the exact number of atom types required and ready-to-paste `labelmap` / `mass` stubs; use those when preparing the main input.
 
 ---
 
@@ -436,4 +587,8 @@ See [`INSTALLATION.md`](INSTALLATION.md) for instructions on compiling LAMMPS wi
 * Each target `size` and `position` must contain exactly three values.
 * Target sizes must be positive.
 * The generated deposition input is intended to be included in a complete LAMMPS input file rather than used as a complete simulation by itself.
-
+* Choose the **source/target mode** to grow a nanoparticle by depositing atoms/clusters onto a substrate over time; choose the **geometry/sintering mode** when you want to start from several equilibrated clusters placed at rest and let them sinter.
+* In geometry mode a `geometry` block with `seeds` replaces the `sources` list, and `n_source_regions` must equal the number of seeds.
+* `overlap_radius` is optional in geometry mode and, if omitted, is derived from the seed's internal minimum pair distance.
+* `delta` is the source-region half-width and hence controls the placement precision of each cluster.
+* The source/target mode is dependency-free; the geometry mode additionally requires `numpy`, `ase` and `scipy`.
