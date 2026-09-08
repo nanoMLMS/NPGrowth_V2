@@ -335,8 +335,14 @@ def expand_geometry(data):
 
     clusters = load_clusters(seed_paths)
 
+    # ---- displacement is mandatory in geometry mode ----
+    if "displacement" not in g:
+        raise ValueError(
+            "geometry: 'displacement' is required in geometry mode. "
+            "It sets the inter-cluster separation."
+        )
+
     # ---- defaults for the geometry block ----
-    g.setdefault("displacement", 10.0)
     g.setdefault("box_margin", 5.0)
     g.setdefault("max_tries", 50000)
     g.setdefault("delta", 0.01)
@@ -847,10 +853,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    generate_script(
-        args.config,
-        args.output
-    )
+    try:
+        generate_script(
+            args.config,
+            args.output
+        )
+    except ValueError as e:
+        print(f"Configuration error: {e}")
+        raise SystemExit(1)
 
     print(
         f"LAMMPS deposition input written to: "

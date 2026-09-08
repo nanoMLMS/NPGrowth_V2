@@ -308,7 +308,7 @@ A sintering configuration uses a `geometry` block at the top level (instead of a
 * `element` / `type` — atomic element label passed to the deposition fixes.
 * `seeds` — one XYZ cluster file per source (length must equal `n_source_regions`). Relative paths are resolved against the config file's directory.
 * `geometry` — one of the named geometries `line`, `tri`, `square`, `tetra`, `y`, or a user-provided list of displacement directions (see below).
-* `displacement` — the inter-cluster separation. The geometry vectors are **not normalized**: for `line`, consecutive clusters are spaced by exactly `displacement`; for `tri`/`square`/`tetra`, `displacement` is the radial scale from the common center.
+* `displacement` — **mandatory** in geometry mode. It sets the inter-cluster separation. The geometry vectors are **not normalized**: for `line`, consecutive clusters are spaced by exactly `displacement`; for `tri`/`square`/`tetra`, `displacement` is the radial scale from the common center.
 * `max_tries` — number of random orientations/placements attempted by the overlap fit (default 50000).
 * `overlap_radius` — optional; half the minimum inter-atomic distance used by the overlap check. If omitted, it is derived automatically from the seed's smallest internal pair distance / 2.
 * `delta` — source-region half-width (placement precision), default `0.01`.
@@ -318,20 +318,34 @@ A sintering configuration uses a `geometry` block at the top level (instead of a
 * `n_depo`, `every` — use `1` and `1` so each cluster is inserted once at the first timestep.
 * `random_seed`, `temperature` — LAMMPS seed and thermostat target temperature.
 
+### Selecting a geometry
+
+The named geometries are chosen with the `geometry` string. Which geometries are available depends on the number of seeds (`n_source_regions`):
+
+* **2 seeds** — the separation is unique, so the two clusters are placed on a line; the `geometry` value is ignored.
+* **3 seeds** — `tri` (equilateral triangle) or `line` (collinear).
+* **4 seeds** — `tetra` (tetrahedron), `square`, `line` (collinear), or `y`.
+
+For example, four seeds in a tetrahedral arrangement (as in the example config) use `"geometry": "tetra"`.
+
+Every positions is computed as `pos_i = offset + direction_i * displacement`. For pure directions of unit length (the `tri`/`tetra`/`square` cases) `displacement` is the radial distance from the shared center; for `line`, the directions are multiples of the unit step so the spacing between consecutive clusters equals `displacement`.
+
 ### Custom directions
 
-Instead of the named `geometry` value you may provide an explicit list of displacement vectors, one per seed:
+For any number of seeds (for example two, or more than four), or to define a geometry with no dedicated name, provide an explicit list of displacement vectors, one per seed:
 
 ```json
 "geometry": {
+  "geometry": "custom",
+  "displacement": 1.0,
   "directions": [
-    [10.0, 0.0, 0.0],
-    [-10.0, 0.0, 0.0]
+    [15.0, 0.0, 0.0],
+    [-15.0, 0.0, 0.0]
   ]
 }
 ```
 
-Each cluster's center of mass is placed at `offset + directions[i]`.
+Each cluster's center of mass is placed at `offset + directions[i] * displacement`. Because the vectors are scaled by `displacement`, set `"displacement": 1.0` if you want the vectors to be used directly as the absolute separations.
 
 ## Overlap fit
 

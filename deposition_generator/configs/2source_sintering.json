@@ -1,0 +1,27 @@
+{
+  "n_source_regions": 2,   
+
+  "geometry": {
+
+    "element": "Cu",
+
+    "seeds": [             
+      "../../lammps_run/seeds/Cu1688_cube_com.xyz",
+      "../../lammps_run/seeds/Cu1688_cube_com.xyz"
+    ],
+
+    "displacement": 40,  
+    "max_tries": 500,    
+    "type": "Cu",
+    "velocity_range": [0.0, 0.0],  
+    "delta": 0.01,
+    "near": 1.3,                 
+    "target_size": [0.1, 0.1, 0.1], 
+    "n_depo": 1,  
+    "every": 1,  
+    "random_seed": 42,
+    "nattempts": 500,
+    "random_seed_LAMMPS": 42
+  }
+
+}
