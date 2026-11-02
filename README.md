@@ -51,6 +51,12 @@ Installation and compilation of the modified LAMMPS version are described in [`I
 
 ---
 
+# Citation
+
+Our paper presenting the package, its workflow, and simulations performed with the code is now published:
+ > G. Nardi, S. Zinzani, L. Stefanelli, and F. Baletto. *Modelling Seeded Growth of Nanoparticles Far from Equilibrium*. Nanomaterials
+2026, 16(21), 1383; https://doi.org/10.3390/nano16211383
+
 # Workflow
 
 The basic workflow is:
